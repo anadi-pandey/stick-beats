@@ -18,6 +18,7 @@ export type DanceState = {
   pose: Pose
   hit: number
   lastTime: number
+  grooveUntil: number
   sawAudio: boolean
 }
 
@@ -36,6 +37,7 @@ export function createDance(now: number): DanceState {
     pose: idlePose(now),
     hit: 0,
     lastTime: now,
+    grooveUntil: 0,
     sawAudio: false,
   }
 }
@@ -45,8 +47,10 @@ export function stepDance(state: DanceState, audio: AudioSnapshot, now: number):
   state.lastTime = now
   state.hit = Math.max(0, state.hit - dt * 2.4)
 
-  const drive = clamp((audio.level - 0.045) / 0.22, 0, 1)
-  const dancing = audio.active && drive > 0.28
+  if (!audio.active) state.grooveUntil = 0
+  else if (audio.beat || audio.level > 0.1 || audio.punch > 0.2) state.grooveUntil = now + 1600
+  const dancing = audio.active && now < state.grooveUntil
+  const drive = dancing ? Math.max(0.78, clamp(audio.level / 0.35, 0, 1)) : clamp(audio.level / 0.4, 0, 0.35)
 
   if (audio.beat && dancing) {
     state.hit = 1
@@ -85,14 +89,14 @@ export function stepDance(state: DanceState, audio: AudioSnapshot, now: number):
 }
 
 function emphasize(pose: Pose, audio: AudioSnapshot): Pose {
-  const bass = 0.55 + audio.bass * 0.9
-  const mid = 0.62 + audio.mid * 0.7
-  const high = 0.4 + audio.high * 1.15
+  const bass = 0.72 + audio.punch * 0.65
+  const mid = 0.75 + audio.mid * 0.45
+  const high = 0.55 + audio.high * 0.9
   return {
     ...pose,
     crouch: pose.crouch * bass,
-    hop: pose.hop * (0.45 + audio.bass * 1.25),
-    chest: pose.chest * bass,
+    hop: pose.hop * (0.4 + audio.punch * 1.35),
+    chest: pose.chest * (0.55 + audio.punch * 0.9),
     hipX: pose.hipX * (0.7 + audio.bass * 0.45),
     lArm: pose.lArm * mid,
     rArm: pose.rArm * mid,

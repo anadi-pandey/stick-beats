@@ -320,16 +320,16 @@ const kick: Pose[] = [
 
 const roll: Pose[] = [
   pose({
-    lean: -0.22,
-    hipX: -0.55,
-    twist: 0.55,
-    chest: 0.15,
-    crouch: 0.35,
-    headTilt: -0.2,
-    lArm: -0.45,
-    rArm: 0.7,
-    lElbow: 0.3,
-    rElbow: -0.45,
+    lean: -0.42,
+    hipX: -0.9,
+    twist: 0.9,
+    chest: 0.2,
+    crouch: 0.45,
+    headTilt: -0.28,
+    lArm: -0.7,
+    rArm: 1.05,
+    lElbow: 0.35,
+    rElbow: -0.55,
   }),
   pose({
     lean: -0.05,
@@ -343,15 +343,15 @@ const roll: Pose[] = [
     rArm: 0.35,
   }),
   pose({
-    lean: 0.2,
-    hipX: 0.45,
-    twist: -0.5,
-    chest: 0.25,
-    crouch: 0.3,
-    headTilt: 0.22,
-    lArm: -0.75,
-    rArm: 0.4,
-    lElbow: 0.5,
+    lean: 0.4,
+    hipX: 0.85,
+    twist: -0.85,
+    chest: 0.3,
+    crouch: 0.4,
+    headTilt: 0.3,
+    lArm: -1.05,
+    rArm: 0.55,
+    lElbow: 0.6,
   }),
   pose({
     lean: 0.02,
@@ -410,14 +410,13 @@ export function idlePose(now: number) {
   return sampleFrames(idle, phase)
 }
 
+const ORDER: MoveId[] = ['bounce', 'wave', 'robot', 'kick', 'roll']
+
 export function nextMove(current: MoveId, bass: number, mid: number, high: number): MoveId {
-  if (high > bass && high > mid && high > 0.18) {
-    return current === 'robot' ? 'bounce' : 'robot'
-  }
-  if (mid > bass * 1.05 && mid >= high) {
+  if (high > bass * 1.3 && high > mid * 1.3 && high > 0.22) return 'robot'
+  if (mid > bass * 1.3 && mid > high && mid > 0.22) {
     return current === 'wave' ? 'roll' : 'wave'
   }
-  if (current === 'bounce') return 'kick'
-  if (current === 'kick') return 'bounce'
-  return bass >= mid ? 'bounce' : 'wave'
+  const index = ORDER.indexOf(current)
+  return ORDER[(index + 1) % ORDER.length]
 }

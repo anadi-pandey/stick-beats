@@ -75,7 +75,7 @@ export function drawStage(
   const pop = 1 + hit * 0.035
 
   const hipX = cx + pose.hipX * unit * 0.07
-  const hipY = ground - thigh - shin + pose.crouch * thigh * 0.42 - pose.hop * unit * 0.045
+  const hipY = ground - thigh - shin + pose.crouch * thigh * 0.55 - pose.hop * unit * 0.07
 
   ctx.save()
   ctx.translate(hipX, hipY)
@@ -133,11 +133,8 @@ export function drawStage(
   ctx.stroke()
 
   ctx.beginPath()
-  ctx.arc(head.x, head.y - headR * 0.15, headR * 1.02, Math.PI * 1.05, Math.PI * 1.95)
-  ctx.stroke()
-  ctx.beginPath()
-  ctx.moveTo(head.x - headR * 0.95, head.y - headR * 0.15)
-  ctx.lineTo(head.x - headR * 1.45, head.y + headR * 0.05)
+  ctx.moveTo(head.x - headR * 0.2, head.y - headR * 0.9)
+  ctx.lineTo(head.x - headR * 1.15, head.y - headR * 0.55)
   ctx.stroke()
 
   const joints = [

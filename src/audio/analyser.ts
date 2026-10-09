@@ -5,6 +5,7 @@ export type AudioSnapshot = {
   mid: number
   high: number
   level: number
+  punch: number
   beat: boolean
   interval: number
   active: boolean
@@ -16,6 +17,7 @@ const SILENT: AudioSnapshot = {
   mid: 0,
   high: 0,
   level: 0,
+  punch: 0,
   beat: false,
   interval: 60 / 92,
   active: false,
@@ -45,6 +47,9 @@ export class Listener {
   private bassEnv = 0
   private lastBeat = 0
   private interval = 60 / 92
+  private heldBass = 0
+  private heldMid = 0
+  private heldHigh = 0
 
   get source() {
     return this.mode
@@ -106,6 +111,10 @@ export class Listener {
       this.stream = null
     }
     this.mode = 'idle'
+    this.heldBass = 0
+    this.heldMid = 0
+    this.heldHigh = 0
+    this.prevBass = 0
   }
 
   stop() {
@@ -190,32 +199,30 @@ export class Listener {
     const bass = this.peak(30, 160, hzPer)
     const mid = this.average(180, 1800, hzPer)
     const high = this.average(2000, 8000, hzPer)
-    const level = bass * 0.5 + mid * 0.35 + high * 0.15
 
     this.bassEnv = this.bassEnv * 0.9 + bass * 0.1
     const rising = bass - this.prevBass
     const gap = this.lastBeat ? now - this.lastBeat : Infinity
-    const minGap = Math.min(0.45, Math.max(0.22, this.interval * 0.55))
     let beat = false
-    if (
-      bass > 0.22 &&
-      rising > 0.035 &&
-      bass > this.bassEnv * 1.12 &&
-      gap > minGap
-    ) {
-      if (this.lastBeat && gap > 0.28 && gap < 1.15) {
-        this.interval = clamp(this.interval * 0.55 + gap * 0.45, 0.32, 1)
+    if (bass > 0.22 && rising > 0.035 && bass > this.bassEnv * 1.12 && gap > 0.48) {
+      if (this.lastBeat && gap < 1.15) {
+        this.interval = clamp(this.interval * 0.55 + gap * 0.45, 0.4, 1)
       }
       this.lastBeat = now
       beat = true
     }
     this.prevBass = bass
+    this.heldBass = glide(this.heldBass, bass)
+    this.heldMid = glide(this.heldMid, mid)
+    this.heldHigh = glide(this.heldHigh, high)
+    const heldLevel = this.heldBass * 0.5 + this.heldMid * 0.35 + this.heldHigh * 0.15
 
     return {
-      bass,
-      mid,
-      high,
-      level,
+      bass: this.heldBass,
+      mid: this.heldMid,
+      high: this.heldHigh,
+      level: heldLevel,
+      punch: bass,
       beat,
       interval: this.interval,
       active: true,
@@ -365,6 +372,11 @@ export class Listener {
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value))
+}
+
+function glide(held: number, value: number) {
+  if (value >= held) return held * 0.4 + value * 0.6
+  return held * 0.986 + value * 0.014
 }
 
 export function describeMicError(error: unknown) {
