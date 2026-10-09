@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-display: "Anton", "Arial Narrow", sans-serif;
+  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+}
+
+:root {
+  --background: #0c0b10;
+  --foreground: #f6f1e7;
+  --primary: #ffb703;
+  --primary-foreground: #1a1203;
+  --secondary: rgba(255, 255, 255, 0.08);
+  --secondary-foreground: #f6f1e7;
+  --accent: rgba(255, 255, 255, 0.1);
+  --accent-foreground: #f6f1e7;
+  --border: rgba(255, 255, 255, 0.16);
+  --ring: #ffb703;
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  background: #0c0b10;
+}
+
+#root {
+  width: 100%;
+  max-width: none;
+  min-height: 100svh;
+  border: none;
+  text-align: left;
+  display: block;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+}
